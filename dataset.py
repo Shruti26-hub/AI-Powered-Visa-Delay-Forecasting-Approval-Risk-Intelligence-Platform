@@ -12,7 +12,7 @@ excel_file = r"C:/Users/Gapat/OneDrive/Desktop/visa/cleaned visa dataset.xlsx"  
 
 df = pd.read_excel(excel_file)
 
-print("✅ Excel Dataset Loaded Successfully!")
+print(" Excel Dataset Loaded Successfully!")
 print("Dataset Shape:", df.shape)
 
 # ==========================================
@@ -28,7 +28,7 @@ print(df.columns)
 
 df = df.dropna(subset=["case_received_date", "decision_date"])
 
-print("\n✅ After Removing Missing Dates:", df.shape)
+print("\n After Removing Missing Dates:", df.shape)
 
 # ==========================================
 # STEP 5: CONVERT DATE COLUMNS TO DATETIME
@@ -39,7 +39,7 @@ df["decision_date"] = pd.to_datetime(df["decision_date"], errors="coerce")
 
 df = df.dropna(subset=["case_received_date", "decision_date"])
 
-print("✅ After Date Conversion:", df.shape)
+print(" After Date Conversion:", df.shape)
 
 # ==========================================
 # STEP 6: REMOVE DUPLICATES
@@ -47,7 +47,7 @@ print("✅ After Date Conversion:", df.shape)
 
 df = df.drop_duplicates()
 
-print("✅ After Removing Duplicates:", df.shape)
+print(" After Removing Duplicates:", df.shape)
 
 # ==========================================
 # STEP 7: CREATE PROCESSING DAYS FEATURE
@@ -60,7 +60,7 @@ df["processing_days"] = (
 # Remove negative values
 df = df[df["processing_days"] >= 0]
 
-print("✅ After Adding Processing Days:", df.shape)
+print(" After Adding Processing Days:", df.shape)
 
 # ==========================================
 # STEP 8: SAVE CLEAN DATASET AS CSV
@@ -70,6 +70,7 @@ output_csv = r"C:\Users\Gapat\Downloads\perm_final_clean.csv"
 
 df.to_csv(output_csv, index=False)
 
-print("\n🎉 DONE! Clean dataset saved successfully.")
-print("📌 Output File Location:", output_csv)
+print("\n DONE! Clean dataset saved successfully.")
+print(" Output File Location:", output_csv)
+
 
