@@ -84,7 +84,7 @@ After Power BI cleaning, the dataset was saved as:
 Python was used for final preprocessing and feature engineering.
 
 ---
-Module 2 — Exploratory Data Analysis (EDA)
+# **Module 2 — Exploratory Data Analysis (EDA)**
 
 EDA was conducted using:
 
