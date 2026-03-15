@@ -194,7 +194,8 @@ Reduces statistical distortion
 Stabilizes regression models
 Maintains full dataset integrity
 
-Module 3 — Machine Learning Modeling & Prediction
+ **Module 3 — ML (EDA)**
+ 
 🎯 Objective
 
 The objective of this phase was to develop a predictive machine learning model capable of estimating visa processing timelines using historical PERM application data.
