@@ -194,7 +194,7 @@ Reduces statistical distortion
 Stabilizes regression models
 Maintains full dataset integrity
 
- **Module 3 — ML (EDA)**
+ **Module 3 — ML **
  
 🎯 Objective
 
