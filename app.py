@@ -208,18 +208,26 @@ if st.sidebar.button("🔍 Run Prediction"):
     # SHAP EXPLANATION
     # -----------------------------
     with colB:
-        st.subheader("🧠 AI Explanation")
+       st.subheader("🧠 AI Explanation")
 
-        explainer = shap.TreeExplainer(model)
-        shap_values = explainer.shap_values(input_data)
+explainer = shap.TreeExplainer(model)
 
-        shap.plots._waterfall.waterfall_legacy(
-            explainer.expected_value,
-            shap_values[0],
-            feature_names=input_data.columns
-        )
+shap_values = explainer.shap_values(input_data)
 
-        st.pyplot(bbox_inches="tight")
+# Create SHAP waterfall plot
+fig, ax = plt.subplots()
+
+shap.waterfall_plot(
+    shap.Explanation(
+        values=shap_values[0],
+        base_values=explainer.expected_value,
+        data=input_data.iloc[0],
+        feature_names=input_data.columns
+    ),
+    show=False
+)
+
+st.pyplot(fig)
 
 # -----------------------------
 # HISTORICAL TREND
