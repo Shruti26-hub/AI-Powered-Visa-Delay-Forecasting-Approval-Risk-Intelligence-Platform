@@ -8,7 +8,34 @@ import matplotlib.pyplot as plt
 # -----------------------------
 # PAGE CONFIG
 # -----------------------------
-st.set_page_config(page_title="AI Visa Processing Intelligence Platform", layout="wide")
+st.set_page_config(
+    page_title="AI Visa Processing Intelligence",
+    page_icon="🌍",
+    layout="wide"
+)
+
+# -----------------------------
+# CUSTOM CSS
+# -----------------------------
+st.markdown("""
+<style>
+.metric-card {
+    background-color:#1E1E1E;
+    padding:20px;
+    border-radius:12px;
+    text-align:center;
+}
+.metric-title {
+    font-size:18px;
+    color:#9aa0a6;
+}
+.metric-value {
+    font-size:32px;
+    color:#00C2A8;
+    font-weight:bold;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # -----------------------------
 # LOAD MODEL
@@ -24,27 +51,28 @@ model = load_model()
 # -----------------------------
 @st.cache_data
 def load_data():
-    df = pd.read_csv("cleaned_visa_dataset.csv")
-    return df
+    return pd.read_csv("cleaned_visa_dataset.csv")
 
 df = load_data()
 
 # -----------------------------
 # HEADER
 # -----------------------------
-st.title("AI Visa Processing Time Intelligence Platform")
+st.title("🌍 AI Visa Processing Time Intelligence Platform")
 
 st.write(
 """
 Predict visa processing timelines using **machine learning analytics**.
-This dashboard estimates visa decision delays based on historical case patterns.
+
+This AI system analyzes historical visa processing patterns to estimate
+future delays and processing timelines.
 """
 )
 
 # -----------------------------
-# SIDEBAR INPUTS
+# SIDEBAR
 # -----------------------------
-st.sidebar.header("Application Details")
+st.sidebar.header("📋 Application Details")
 
 visa_type = st.sidebar.selectbox(
     "Visa Type",
@@ -66,10 +94,17 @@ workload_level = st.sidebar.slider(
     1, 100, 30
 )
 
+st.sidebar.info(
+"""
+Application workload represents how many visa cases immigration
+offices are processing during that time period.
+"""
+)
+
 # -----------------------------
 # FEATURE PREPARATION
 # -----------------------------
-filing_quarter = (application_month - 1) // 3 + 1
+filing_quarter = (application_month - 1)//3 + 1
 
 input_data = pd.DataFrame({
     "filing_year":[filing_year],
@@ -89,100 +124,112 @@ if hasattr(model, "feature_names_in_"):
 # -----------------------------
 # RUN PREDICTION
 # -----------------------------
-if st.sidebar.button("Run Prediction"):
+if st.sidebar.button("🔍 Run Prediction"):
 
     prediction = model.predict(input_data)[0]
 
-    # Confidence interval
     tree_preds = np.array([tree.predict(input_data)[0] for tree in model.estimators_])
     std = np.std(tree_preds)
 
-    lower = prediction - 1.96 * std
-    upper = prediction + 1.96 * std
+    lower = prediction - 1.96*std
+    upper = prediction + 1.96*std
 
-    risk_score = min(prediction / 2500, 1)
+    risk_score = min(prediction/2500,1)
 
     # -----------------------------
-    # METRICS
+    # METRICS DASHBOARD
     # -----------------------------
+    st.header("📊 Prediction Results")
+
     col1, col2, col3 = st.columns(3)
 
-    col1.metric(
-        "Estimated Processing Time",
-        f"{int(prediction)} Days"
-    )
+    with col1:
+        st.markdown(
+        f"""
+        <div class="metric-card">
+        <div class="metric-title">Estimated Processing Time</div>
+        <div class="metric-value">{int(prediction)} Days</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    col2.metric(
-        "Delay Risk Score",
-        f"{risk_score*100:.1f}%"
-    )
+    with col2:
+        st.markdown(
+        f"""
+        <div class="metric-card">
+        <div class="metric-title">Delay Risk Score</div>
+        <div class="metric-value">{risk_score*100:.1f}%</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    col3.metric(
-        "Confidence Interval",
-        f"{int(lower)} - {int(upper)} days"
-    )
+    with col3:
+        st.markdown(
+        f"""
+        <div class="metric-card">
+        <div class="metric-title">Confidence Interval</div>
+        <div class="metric-value">{int(lower)} - {int(upper)} days</div>
+        </div>
+        """, unsafe_allow_html=True)
 
     # -----------------------------
-    # RISK INDICATOR
+    # APPROVAL RISK
     # -----------------------------
-    st.subheader("Delay Risk Assessment")
+    st.header("⚠️ Approval Risk Assessment")
 
     if risk_score > 0.7:
-        st.error("High Delay Risk")
+        st.error("High delay risk detected.")
     elif risk_score > 0.4:
-        st.warning("Moderate Delay Risk")
+        st.warning("Moderate delay risk.")
     else:
-        st.success("Low Delay Risk")
+        st.success("Low delay risk.")
 
     st.progress(risk_score)
 
     # -----------------------------
     # PREDICTION CHART
     # -----------------------------
-    st.subheader("Processing Time Forecast")
+    colA, colB = st.columns(2)
 
-    fig, ax = plt.subplots()
+    with colA:
+        st.subheader("📈 Processing Time Forecast")
 
-    ax.bar(
-        ["Predicted Processing Days"],
-        [prediction],
-        color="#4CAF50"
-    )
+        fig, ax = plt.subplots()
 
-    ax.set_ylabel("Days")
-    ax.set_title("AI Forecast")
+        ax.bar(
+            ["Predicted Processing Days"],
+            [prediction],
+            color="#00C2A8"
+        )
 
-    st.pyplot(fig)
+        ax.set_ylabel("Days")
+
+        st.pyplot(fig)
 
     # -----------------------------
     # SHAP EXPLANATION
     # -----------------------------
-    st.subheader("Model Explanation")
+    with colB:
+        st.subheader("🧠 AI Explanation")
 
-    explainer = shap.TreeExplainer(model)
-    shap_values = explainer.shap_values(input_data)
+        explainer = shap.TreeExplainer(model)
+        shap_values = explainer.shap_values(input_data)
 
-    shap.plots._waterfall.waterfall_legacy(
-        explainer.expected_value,
-        shap_values[0],
-        feature_names=input_data.columns
-    )
+        shap.plots._waterfall.waterfall_legacy(
+            explainer.expected_value,
+            shap_values[0],
+            feature_names=input_data.columns
+        )
 
-    st.pyplot(bbox_inches="tight")
+        st.pyplot(bbox_inches="tight")
 
 # -----------------------------
-# HISTORICAL TREND CHART
+# HISTORICAL TREND
 # -----------------------------
-st.subheader("Historical Visa Processing Trends")
+st.header("📅 Historical Visa Processing Trends")
 
-# Convert date columns
 df["case_received_date"] = pd.to_datetime(df["case_received_date"], errors="coerce")
 df["decision_date"] = pd.to_datetime(df["decision_date"], errors="coerce")
 
-# Create processing_days
 df["processing_days"] = (df["decision_date"] - df["case_received_date"]).dt.days
-
-# Extract year
 df["year"] = df["case_received_date"].dt.year
 
 trend = df.groupby("year")["processing_days"].mean()
@@ -193,18 +240,32 @@ ax2.plot(
     trend.index,
     trend.values,
     marker="o",
-    color="#00C2A8",
+    color="#4CAF50",
     linewidth=3
 )
 
 ax2.set_xlabel("Year")
 ax2.set_ylabel("Average Processing Days")
-ax2.set_title("Visa Processing Trends Over Time")
 
 st.pyplot(fig2)
+
+# -----------------------------
+# BUSINESS INSIGHTS
+# -----------------------------
+st.header("💡 Business Insights")
+
+st.markdown("""
+• Visa processing delays tend to increase when **application workload rises**.
+
+• Certain visa types historically experience **longer processing times**.
+
+• Seasonal filing patterns may impact decision timelines.
+
+• Predictive analytics can help applicants estimate **expected processing delays**.
+""")
 
 # -----------------------------
 # FOOTER
 # -----------------------------
 st.markdown("---")
-st.caption("AI-Powered Visa Delay Forecasting Platform")
+st.caption("AI-Powered Visa Delay Forecasting Platform | Machine Learning Dashboard")
