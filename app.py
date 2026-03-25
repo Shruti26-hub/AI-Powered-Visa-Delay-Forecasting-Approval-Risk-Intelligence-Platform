@@ -208,27 +208,30 @@ if st.sidebar.button("🔍 Run Prediction"):
     # SHAP EXPLANATION
     # -----------------------------
     with colB:
-       st.subheader("🧠 AI Explanation")
+      st.subheader("🧠 AI Explanation")
 
 explainer = shap.TreeExplainer(model)
 
 shap_values = explainer.shap_values(input_data)
 
-# Create SHAP waterfall plot
-fig, ax = plt.subplots()
+# Handle expected value safely
+expected_value = explainer.expected_value
+if isinstance(expected_value, list) or isinstance(expected_value, np.ndarray):
+    expected_value = expected_value[0]
 
-shap.waterfall_plot(
-    shap.Explanation(
-        values=shap_values[0],
-        base_values=explainer.expected_value,
-        data=input_data.iloc[0],
-        feature_names=input_data.columns
-    ),
-    show=False
+# Create explanation object
+explanation = shap.Explanation(
+    values=shap_values[0],
+    base_values=expected_value,
+    data=input_data.iloc[0],
+    feature_names=input_data.columns
 )
 
-st.pyplot(fig)
+fig, ax = plt.subplots()
 
+shap.waterfall_plot(explanation, show=False)
+
+st.pyplot(fig)
 # -----------------------------
 # HISTORICAL TREND
 # -----------------------------
