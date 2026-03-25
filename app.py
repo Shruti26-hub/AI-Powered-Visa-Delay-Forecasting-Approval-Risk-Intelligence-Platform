@@ -52,9 +52,10 @@ application_month = st.sidebar.slider(
 
 filing_year = st.sidebar.slider(
     "Application Year",
-    int(df["filing_year"].min()),
-    int(df["filing_year"].max()),
-    int(df["filing_year"].median())
+    2007,
+    2016,
+    2012
+
 )
 
 workload = st.sidebar.slider(
@@ -175,7 +176,7 @@ if st.sidebar.button("Run Prediction"):
 # -----------------------------
 st.subheader("Historical Visa Processing Trends")
 
-trend = df.groupby("filing_year")["processing_days"].mean()
+trend = df.groupby(df["case_received_date"].str[:4])["processing_days"].mean()
 
 fig3, ax = plt.subplots()
 
