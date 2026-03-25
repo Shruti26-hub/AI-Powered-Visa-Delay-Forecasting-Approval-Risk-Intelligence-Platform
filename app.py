@@ -20,7 +20,7 @@ model = load_model()
 # Load dataset for trend charts
 @st.cache_data
 def load_data():
-    return pd.read_excel("cleaned visa dataset.xlsx")
+    return pd.read_csv("cleaned_visa_dataset.csv")
 
 df = load_data()
 
