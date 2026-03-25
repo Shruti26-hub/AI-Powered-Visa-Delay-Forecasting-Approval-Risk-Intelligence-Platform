@@ -4,99 +4,115 @@ import joblib
 import shap
 import matplotlib.pyplot as plt
 
-# -----------------------------
-# Page Configuration
-# -----------------------------
+# -----------------------
+# PAGE CONFIG
+# -----------------------
 st.set_page_config(
-    page_title="AI Visa Processing Predictor",
-    page_icon="📊",
+    page_title="AI Visa Processing Intelligence",
     layout="wide"
 )
 
-# -----------------------------
-# Load Model
-# -----------------------------
+# -----------------------
+# CUSTOM STYLE
+# -----------------------
+st.markdown("""
+<style>
+.main {
+    background-color:#0E1117;
+}
+.stButton>button {
+    background-color:#4CAF50;
+    color:white;
+    border-radius:8px;
+}
+.metric-box {
+    background-color:#1E1E1E;
+    padding:20px;
+    border-radius:10px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# -----------------------
+# LOAD MODEL
+# -----------------------
 @st.cache_resource
 def load_model():
-    model = joblib.load("rf_model.pkl")
-    return model
+    return joblib.load("rf_model.pkl")
 
 model = load_model()
 
-# -----------------------------
-# Dashboard Header
-# -----------------------------
+# -----------------------
+# TITLE
+# -----------------------
 st.title("AI Visa Processing Time Intelligence Platform")
-st.markdown(
+st.write(
 """
-Predict visa processing timelines using machine learning insights.
-
-This AI tool analyzes application patterns and estimates processing delays.
+Predict visa processing timelines using **machine learning analytics**.
+This dashboard estimates visa decision delays based on historical case patterns.
 """
 )
 
-# -----------------------------
-# Sidebar Inputs
-# -----------------------------
+# -----------------------
+# SIDEBAR INPUTS
+# -----------------------
 st.sidebar.header("Application Details")
 
 visa_type = st.sidebar.selectbox(
-    "Visa Type",
+    "Visa Category",
     ["F-1", "H-1B", "B-2", "E-2", "L-1"]
 )
 
 application_month = st.sidebar.slider(
     "Application Month",
-    min_value=1,
-    max_value=12,
-    value=6
+    1, 12, 6
 )
 
 filing_year = st.sidebar.slider(
     "Application Year",
-    min_value=2008,
-    max_value=2016,
-    value=2013
+    2007, 2015, 2012
 )
 
-monthly_volume = st.sidebar.slider(
-    "Application Volume",
-    min_value=1,
-    max_value=100,
-    value=30
+workload_level = st.sidebar.slider(
+    "Immigration Workload Level",
+    1, 100, 30
 )
 
-# -----------------------------
-# Prepare Input Data
-# -----------------------------
+st.sidebar.write(
+"Workload level represents the number of applications processed during that period."
+)
+
+# -----------------------
+# FEATURE PREPARATION
+# -----------------------
+
+filing_quarter = (application_month - 1) // 3 + 1
+
 input_data = pd.DataFrame({
-    "visa_type": [visa_type],
-    "month": [application_month],
-    "filing_year": [filing_year],
-    "monthly_volume": [monthly_volume]
+    "filing_year":[filing_year],
+    "filing_month":[application_month],
+    "filing_quarter":[filing_quarter],
+    "monthly_volume":[workload_level]
 })
 
-# -----------------------------
-# Prediction Button
-# -----------------------------
+# -----------------------
+# PREDICTION
+# -----------------------
 if st.sidebar.button("Run Prediction"):
 
     prediction = model.predict(input_data)[0]
 
-    # -----------------------------
-    # Risk Score
-    # -----------------------------
     risk_score = min(prediction / 2500, 1)
 
-    # -----------------------------
-    # Dashboard Results
-    # -----------------------------
+    # -----------------------
+    # METRICS
+    # -----------------------
     col1, col2 = st.columns(2)
 
     with col1:
         st.metric(
             "Estimated Processing Time",
-            f"{prediction:.0f} days"
+            f"{int(prediction)} Days"
         )
 
     with col2:
@@ -105,9 +121,9 @@ if st.sidebar.button("Run Prediction"):
             f"{risk_score*100:.1f}%"
         )
 
-    # -----------------------------
-    # Risk Indicator
-    # -----------------------------
+    # -----------------------
+    # RISK INDICATOR
+    # -----------------------
     st.subheader("Delay Risk Assessment")
 
     if risk_score > 0.7:
@@ -119,31 +135,30 @@ if st.sidebar.button("Run Prediction"):
 
     st.progress(risk_score)
 
-    # -----------------------------
-    # Visualization Chart
-    # -----------------------------
-    st.subheader("Predicted Processing Time")
+    # -----------------------
+    # VISUALIZATION
+    # -----------------------
+    st.subheader("Processing Time Forecast")
 
     fig, ax = plt.subplots()
 
     ax.bar(
-        ["Estimated Processing Days"],
+        ["Predicted Processing Days"],
         [prediction],
-        color="steelblue"
+        color="#4CAF50"
     )
 
     ax.set_ylabel("Days")
-    ax.set_title("Processing Time Forecast")
+    ax.set_title("AI Forecast")
 
     st.pyplot(fig)
 
-    # -----------------------------
-    # SHAP Explainability
-    # -----------------------------
-    st.subheader("AI Model Explainability")
+    # -----------------------
+    # SHAP EXPLAINABILITY
+    # -----------------------
+    st.subheader("Model Explainability")
 
     explainer = shap.TreeExplainer(model)
-
     shap_values = explainer.shap_values(input_data)
 
     shap.summary_plot(
@@ -154,13 +169,8 @@ if st.sidebar.button("Run Prediction"):
 
     st.pyplot(bbox_inches="tight")
 
-# -----------------------------
-# Footer
-# -----------------------------
+# -----------------------
+# FOOTER
+# -----------------------
 st.markdown("---")
-st.markdown(
-"""
-AI-Powered Visa Delay Forecasting Platform  
-Machine Learning + Predictive Analytics
-"""
-)
+st.caption("AI-Powered Visa Delay Forecasting Platform")
