@@ -5,30 +5,36 @@ import shap
 import numpy as np
 import matplotlib.pyplot as plt
 
-st.set_page_config(page_title="AI Visa Processing Intelligence", layout="wide")
+# -----------------------------
+# PAGE CONFIG
+# -----------------------------
+st.set_page_config(page_title="AI Visa Processing Intelligence Platform", layout="wide")
 
 # -----------------------------
 # LOAD MODEL
 # -----------------------------
 @st.cache_resource
 def load_model():
-    model = joblib.load("rf_model.pkl")
-    return model
+    return joblib.load("rf_model.pkl")
 
 model = load_model()
 
-# Load dataset for trend charts
+# -----------------------------
+# LOAD DATASET
+# -----------------------------
 @st.cache_data
 def load_data():
-    return pd.read_csv("cleaned_visa_dataset.csv")
+    df = pd.read_csv("cleaned_visa_dataset.csv")
+    return df
 
 df = load_data()
 
 # -----------------------------
-# PAGE HEADER
+# HEADER
 # -----------------------------
 st.title("AI Visa Processing Time Intelligence Platform")
-st.markdown(
+
+st.write(
 """
 Predict visa processing timelines using **machine learning analytics**.
 This dashboard estimates visa decision delays based on historical case patterns.
@@ -36,13 +42,13 @@ This dashboard estimates visa decision delays based on historical case patterns.
 )
 
 # -----------------------------
-# SIDEBAR INPUT
+# SIDEBAR INPUTS
 # -----------------------------
 st.sidebar.header("Application Details")
 
 visa_type = st.sidebar.selectbox(
     "Visa Type",
-    df["class_of_admission"].dropna().unique()
+    ["H-1B", "F-1", "B-2", "E-2", "L-1"]
 )
 
 application_month = st.sidebar.slider(
@@ -52,37 +58,32 @@ application_month = st.sidebar.slider(
 
 filing_year = st.sidebar.slider(
     "Application Year",
-    2007,
-    2016,
-    2012
-
+    2007, 2016, 2012
 )
 
-workload = st.sidebar.slider(
+workload_level = st.sidebar.slider(
     "Application Workload Level",
     1, 100, 30
 )
 
 # -----------------------------
-# PREPARE INPUT
+# FEATURE PREPARATION
 # -----------------------------
-filing_quarter = (application_month - 1)//3 + 1
+filing_quarter = (application_month - 1) // 3 + 1
 
 input_data = pd.DataFrame({
     "filing_year":[filing_year],
     "filing_month":[application_month],
     "filing_quarter":[filing_quarter],
-    "monthly_volume":[workload]
+    "monthly_volume":[workload_level]
 })
 
-# Align features with model expectation
+# Ensure features match model
 if hasattr(model, "feature_names_in_"):
     expected_features = list(model.feature_names_in_)
-
     for col in expected_features:
         if col not in input_data.columns:
             input_data[col] = 0
-
     input_data = input_data[expected_features]
 
 # -----------------------------
@@ -92,12 +93,12 @@ if st.sidebar.button("Run Prediction"):
 
     prediction = model.predict(input_data)[0]
 
-    # Confidence interval using tree variance
-    tree_preds = np.array([t.predict(input_data)[0] for t in model.estimators_])
+    # Confidence interval
+    tree_preds = np.array([tree.predict(input_data)[0] for tree in model.estimators_])
     std = np.std(tree_preds)
 
-    lower = prediction - 1.96*std
-    upper = prediction + 1.96*std
+    lower = prediction - 1.96 * std
+    upper = prediction + 1.96 * std
 
     risk_score = min(prediction / 2500, 1)
 
@@ -117,7 +118,7 @@ if st.sidebar.button("Run Prediction"):
     )
 
     col3.metric(
-        "Confidence Range",
+        "Confidence Interval",
         f"{int(lower)} - {int(upper)} days"
     )
 
@@ -143,9 +144,9 @@ if st.sidebar.button("Run Prediction"):
     fig, ax = plt.subplots()
 
     ax.bar(
-        ["Predicted Days"],
+        ["Predicted Processing Days"],
         [prediction],
-        color="#00C2A8"
+        color="#4CAF50"
     )
 
     ax.set_ylabel("Days")
@@ -154,14 +155,12 @@ if st.sidebar.button("Run Prediction"):
     st.pyplot(fig)
 
     # -----------------------------
-    # SHAP WATERFALL EXPLANATION
+    # SHAP EXPLANATION
     # -----------------------------
-    st.subheader("AI Decision Explanation")
+    st.subheader("Model Explanation")
 
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(input_data)
-
-    fig2 = plt.figure()
 
     shap.plots._waterfall.waterfall_legacy(
         explainer.expected_value,
@@ -169,28 +168,43 @@ if st.sidebar.button("Run Prediction"):
         feature_names=input_data.columns
     )
 
-    st.pyplot(fig2)
+    st.pyplot(bbox_inches="tight")
 
 # -----------------------------
 # HISTORICAL TREND CHART
 # -----------------------------
 st.subheader("Historical Visa Processing Trends")
 
-trend = df.groupby(df["case_received_date"].str[:4])["processing_days"].mean()
+# Convert date columns
+df["case_received_date"] = pd.to_datetime(df["case_received_date"], errors="coerce")
+df["decision_date"] = pd.to_datetime(df["decision_date"], errors="coerce")
 
-fig3, ax = plt.subplots()
+# Create processing_days
+df["processing_days"] = (df["decision_date"] - df["case_received_date"]).dt.days
 
-ax.plot(
+# Extract year
+df["year"] = df["case_received_date"].dt.year
+
+trend = df.groupby("year")["processing_days"].mean()
+
+fig2, ax2 = plt.subplots()
+
+ax2.plot(
     trend.index,
     trend.values,
     marker="o",
-    color="#4CAF50"
+    color="#00C2A8",
+    linewidth=3
 )
 
-ax.set_xlabel("Year")
-ax.set_ylabel("Average Processing Days")
-ax.set_title("Visa Processing Trends Over Time")
+ax2.set_xlabel("Year")
+ax2.set_ylabel("Average Processing Days")
+ax2.set_title("Visa Processing Trends Over Time")
 
-st.pyplot(fig3)
+st.pyplot(fig2)
 
+# -----------------------------
+# FOOTER
+# -----------------------------
+st.markdown("---")
 st.caption("AI-Powered Visa Delay Forecasting Platform")
