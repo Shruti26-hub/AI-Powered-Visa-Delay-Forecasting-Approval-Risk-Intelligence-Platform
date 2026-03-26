@@ -192,18 +192,19 @@ if st.sidebar.button("🔍 Run Prediction"):
     with colA:
         st.subheader("📈 Processing Time Forecast")
 
-        fig, ax = plt.subplots()
+      avg_days = df["processing_days"].mean()
 
-        ax.bar(
-            ["Predicted Processing Days"],
-            [prediction],
-            color="#00C2A8"
-        )
+fig, ax = plt.subplots()
 
-        ax.set_ylabel("Days")
+labels = ["Predicted", "Dataset Average"]
+values = [prediction, avg_days]
 
-        st.pyplot(fig)
+ax.bar(labels, values, color=["#00C2A8","#FFA500"])
 
+ax.set_ylabel("Days")
+ax.set_title("Processing Time Comparison")
+
+st.pyplot(fig)
     # -----------------------------
     # SHAP EXPLANATION
     # -----------------------------
