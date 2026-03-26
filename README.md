@@ -17,7 +17,7 @@ This interactive dashboard allows users to:
 - Explore AI explainability through SHAP visualizations
 - Simulate application scenarios using the interactive simulator
 
-## Dataset Cleaning & Preprocessing (Module 1)
+
 
 ---
 
@@ -70,7 +70,7 @@ The cleaned dataset was prepared using both:
 ##  Cleaning & Preprocessing Steps
 
 ---
-
+## Dataset Cleaning & Preprocessing (Module 1)
 # 1️⃣ Data Cleaning in Power BI
 
 The raw dataset contained:
