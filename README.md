@@ -2,6 +2,21 @@
 The AI-Powered Visa Delay Forecasting & Approval Risk Intelligence Platform is a cutting-edge solution designed to demystify the complex world of global immigration. By leveraging advanced machine learning algorithms, this platform provides applicants, legal firms, and HR departments with high-accuracy predictions for visa processing times and a comprehensive risk assessment of application approval. 
 It analyzes historical trends, current regulatory environments, and individual application data to identify potential red flags before submission, significantly reducing the uncertainty of international mobility and improving success rates through proactive, data-driven intelligence.
 
+## 🚀 Live Application
+
+You can access the deployed Streamlit dashboard here:
+
+🔗 **Streamlit App:**  
+https://mv2dybf9nazkdfqcas2kba.streamlit.app/
+
+This interactive dashboard allows users to:
+
+- Predict visa processing timelines
+- Analyze historical visa processing trends
+- Evaluate delay risk using machine learning
+- Explore AI explainability through SHAP visualizations
+- Simulate application scenarios using the interactive simulator
+
 ## Dataset Cleaning & Preprocessing (Module 1)
 
 ---
