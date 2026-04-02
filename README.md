@@ -290,10 +290,10 @@ Root Mean Squared Error (RMSE)
 Represents the average prediction error in days, making the results easier to interpret.
 
 Model Performance Comparison
-Model	MSE	RMSE (Days)
-Linear Regression	9606	98
-Decision Tree	11521	107
-Random Forest	7936	89
+Model	MSE,	RMSE (Days)
+Linear Regression	9606 ,	98
+Decision Tree	11521	, 107
+Random Forest	7936	, 89
 🏆 Best Model
 
 Random Forest Regressor
